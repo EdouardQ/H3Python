@@ -31,10 +31,10 @@ def read_product(product_id: int):
     return JSONResponse(status_code=404, content={"message": "The product was not found"})
 
 
+# curl -X POST http://127.0.0.1:8000/products\?name\=stylo\&price\=3.80
 @app.post("/products", response_model=Product)
-async def add_product(name: str, price: float):
-    await insert_product(name, price)
-    return JSONResponse(status_code=200, content={"message": "done"})
+def add_product(name: str, price: float):
+    return insert_product(name, price)
 
 
 def create_connexion():
@@ -94,16 +94,22 @@ def getProduct(product_id: int):
         exit(1)
 
 
-async def insert_product(name: str, price: float):
+def insert_product(name: str, price: float):
     try:
         cnx = create_connexion()
         cursor = cnx.cursor()
-        query = ("INSERT INTO product (name, price) VALUE (%s, %s)", (name, price))
+        query = "INSERT INTO product (name, price) VALUE (%s, %s)"
 
-        cursor.execute(query)
+        cursor.execute(query, (name, price))
         cnx.commit()
 
         print(cursor.rowcount, "record inserted")
+        product = Product(id=cursor.lastrowid, name=name, price=price)
+
+        cursor.close()
+        cnx.close()
+
+        return product
 
     except mysql.connector.Error as err:
         print("Failed fetching database: {}".format(err))
