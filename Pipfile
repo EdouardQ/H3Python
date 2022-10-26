@@ -8,6 +8,7 @@ fastapi = "*"
 "mysql.connector" = "*"
 pandas = "*"
 seaborn = "*"
+uvicorn = "*"
 
 [dev-packages]
 
